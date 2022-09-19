@@ -1,21 +1,23 @@
-# Hello world javascript action
+# Get PR changes action
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+This action summarizes the changes in a PR based on all commits.
 
 ## Inputs
 
-## `who-to-greet`
+## `pr-number`
 
-**Required** The name of the person to greet. Default `"World"`.
+**Required** The PR number
 
 ## Outputs
 
-## `time`
+## `changes`
 
-The time we greeted you.
+The changes that are included in this PR.
 
 ## Example usage
 
+```
 uses: yining1023/pr-changes-action@v1.1
 with:
 who-to-greet: 'Mona the Octocat'
+```
