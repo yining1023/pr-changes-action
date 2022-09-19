@@ -5,7 +5,7 @@ const run = async () => {
   try {
     // `pr-number` input defined in action metadata file
     const prNumber = core.getInput("pr-number");
-    console.log(`PR: ${prNumber}!`);
+    console.log(`PR: ${prNumber}`);
 
     const githubToken = core.getInput("GITHUB_TOKEN");
     const octokit = github.getOctokit(githubToken);
@@ -16,9 +16,9 @@ const run = async () => {
       pull_number: prNumber,
     });
 
-    console.log(commits);
+    // console.log(commits);
 
-    const changesByGroup = {};
+    let changesByGroup = {};
 
     for (let i = 0; i < commits.length; i++) {
       const commit = commits[i];
@@ -52,11 +52,11 @@ const run = async () => {
       }
     }
 
-    const changes = ``;
+    let changes = ``;
     console.log(changesByGroup);
-    for (const category in changesByGroup) {
-      changes += `**${category}:**\n`;
-      changes += changesByGroup[category];
+    for (let group in changesByGroup) {
+      changes += `**${group}:**\n`;
+      changes += changesByGroup[group];
     }
 
     core.setOutput("changes", changes);
