@@ -46,7 +46,7 @@ const run = async () => {
             if (!changesByGroup[category]) {
               changesByGroup[category] = "";
             }
-            var lastSpaceIndex = str.lastIndexOf(" ");
+            var lastSpaceIndex = message.lastIndexOf(" ");
             const text = message.substring(0, lastSpaceIndex);
             const link = commitPR.html_url;
             changesByGroup[category] += `- [${text}](${link})\n`;
