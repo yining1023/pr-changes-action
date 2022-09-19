@@ -41,12 +41,15 @@ const run = async () => {
             const endIndex = commitPRBody.indexOf("\n", categoryReg.index);
             const category = commitPRBody.substring(
               categoryReg.index + 6,
-              endIndex
+              endIndex - 2
             );
             if (!changesByGroup[category]) {
               changesByGroup[category] = "";
             }
-            changesByGroup[category] += `- ${message}\n`;
+            var lastSpaceIndex = str.lastIndexOf(" ");
+            const text = message.substring(0, lastSpaceIndex);
+            const link = commitPR.html_url;
+            changesByGroup[category] += `- [${text}](${link})\n`;
           }
         }
       }
@@ -58,7 +61,6 @@ const run = async () => {
       changes += `**${group}:**\n`;
       changes += changesByGroup[group];
     }
-
     core.setOutput("changes", changes);
     // Get the JSON webhook payload for the event that triggered the workflow
     const payload = JSON.stringify(github.context.payload, undefined, 2);
