@@ -10,7 +10,7 @@ const run = async () => {
     const githubToken = core.getInput("GITHUB_TOKEN");
     const octokit = github.getOctokit(githubToken);
 
-    const commits = await octokit.rest.pulls.listCommits({
+    const { data: commits } = await octokit.rest.pulls.listCommits({
       owner: "yining1023",
       repo: "test-github-actions",
       pull_number: prNumber,
@@ -18,16 +18,48 @@ const run = async () => {
 
     console.log(commits);
 
-    let changes = `
-      **New Features:**
-      **UX Improvement:**
-      **Fixes:**
-      **Performance Improvement:**
-      **Documentation:**
-      **Dev experience:**
-        `;
+    const changesByGroup = {};
 
-    core.setOutput("changes", commits);
+    for (let i = 0; i < commits.length; i++) {
+      const commit = commits[i];
+      const message = commit.commit.message;
+      const commitPrNumberReg = new RegExp("#[0-9]+\\)").exec(message);
+      if (commitPrNumberReg && commitPrNumberReg[0]) {
+        const commitPrNumber = commitPrNumberReg[0]
+          .replace("#", "")
+          .replace(")", "");
+        const { data: commitPR } = await octokit.rest.pulls.get({
+          owner: "yining1023",
+          repo: "test-github-actions",
+          pull_number: commitPrNumber,
+        });
+        if (commitPR) {
+          console.log(commitPR);
+          const commitPRBody = commitPR.body;
+          const categoryReg = new RegExp("- \\[x\\] ").exec(commitPRBody);
+          if (categoryReg && categoryReg[0]) {
+            const endIndex = commitPRBody.indexOf("\n", categoryReg.index);
+            const category = commitPRBody.substring(
+              categoryReg.index + 6,
+              endIndex
+            );
+            if (!changesByGroup[category]) {
+              changesByGroup[category] = "";
+            }
+            changesByGroup[category] += `- ${message}\n`;
+          }
+        }
+      }
+    }
+
+    const changes = ``;
+    console.log(changesByGroup);
+    for (const category in changesByGroup) {
+      changes += `**${category}:**\n`;
+      changes += changesByGroup[category];
+    }
+
+    core.setOutput("changes", changes);
     // Get the JSON webhook payload for the event that triggered the workflow
     const payload = JSON.stringify(github.context.payload, undefined, 2);
     console.log(`The event payload: ${payload}`);
