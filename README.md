@@ -8,6 +8,10 @@ This action summarizes the changes in a PR based on all commits. And update the 
 
 **Required** The PR number
 
+## `GITHUB_TOKEN`
+
+**Required**
+
 ## Outputs
 
 ## `changes`
