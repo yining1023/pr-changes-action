@@ -10,8 +10,6 @@ const run = async () => {
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
 
-    console.log({ prNumber, owner, repo });
-
     const { data: commits } = await octokit.rest.pulls.listCommits({
       owner,
       repo,
@@ -45,7 +43,7 @@ const run = async () => {
             if (!changesByGroup[category]) {
               changesByGroup[category] = [];
             }
-            const text = message.substring(0, commitPrNumberReg.index);
+            const text = message.substring(0, commitPrNumberReg.index - 1);
             const link = commitPR.html_url;
             changesByGroup[category].push(`- [${text}](${link})\r\n`);
           }
@@ -54,14 +52,32 @@ const run = async () => {
     }
 
     let changes = ``;
-    console.log("changesByGroup", changesByGroup);
     for (let group in changesByGroup) {
       changes += `\n`;
       changes += `**${group}:**\r\n`;
       changes += changesByGroup[group].map((change) => change).join("");
     }
-    console.log("changes", changes);
-    core.setOutput("changes", changes);
+
+    const { data: releasePr } = await octokit.rest.pulls.get({
+      owner,
+      repo,
+      pull_number: prNumber,
+    });
+    const body = releasePr.body;
+    const newBody = `
+    We are ready for QA. Shoutout to @design-team @engineering-team for all the updates!:tada:\r\n
+    ${changes}\r\n
+    ${body}\r\n
+    PR: [#${prNumber}](https://github.com/runwayml/app/pull/${prNumber})\r\n
+    `;
+
+    await octokit.rest.pulls.update({
+      owner,
+      repo,
+      pull_number: prNumber,
+      body: newBody,
+    });
+    core.setOutput("changes", newBody);
   } catch (error) {
     core.setFailed(error.message);
   }
