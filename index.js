@@ -10,7 +10,7 @@ const run = async () => {
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
 
-    const { data: commits } = await octokit.rest.pulls.listCommits({
+    const commits = await octokit.paginate(octokit.rest.pulls.listCommits, {
       owner,
       repo,
       pull_number: prNumber,
