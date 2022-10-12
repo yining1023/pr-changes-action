@@ -10,7 +10,7 @@ const run = async () => {
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
 
-    const { data: commits } = await octokit.rest.pulls.listCommits({
+    const commits = await octokit.paginate(octokit.rest.pulls.listCommits, {
       owner,
       repo,
       pull_number: prNumber,
@@ -31,22 +31,30 @@ const run = async () => {
           repo,
           pull_number: commitPrNumber,
         });
-        if (commitPR) {
-          const commitPRBody = commitPR.body;
-          const categoryReg = new RegExp("- \\[x\\] ").exec(commitPRBody);
-          if (categoryReg && categoryReg[0]) {
-            const endIndex = commitPRBody.indexOf("\n", categoryReg.index);
-            const category = commitPRBody.substring(
-              categoryReg.index + 6,
-              endIndex - 1
-            );
-            if (!changesByGroup[category]) {
-              changesByGroup[category] = [];
-            }
-            const text = message.substring(0, commitPrNumberReg.index - 1);
-            const link = commitPR.html_url;
-            changesByGroup[category].push(`- [${text}](${link})\r\n`);
+        if (!commitPR || !commitPR.body) continue;
+
+        const commitPRBody = commitPR.body;
+
+        // Remove text before this heading, because any checkbox can match the regex for [x]
+        const typeOfChangeHeadingIndex = commitPRBody.indexOf("Type of change");
+        if (typeOfChangeHeadingIndex === -1) continue;
+        const bodyAfterHeading = commitPRBody.substring(
+          typeOfChangeHeadingIndex
+        );
+
+        // Matches [x][X][ x][x ] followed by anything and then the end of the line
+        const categoryReg = new RegExp("(- \\[ *[xX] *\\] )(.*$)", "m").exec(
+          bodyAfterHeading
+        );
+        if (categoryReg) {
+          // The contents of the second capture group `(.*$)`
+          const category = categoryReg[2];
+          if (!changesByGroup[category]) {
+            changesByGroup[category] = [];
           }
+          const text = message.substring(0, commitPrNumberReg.index - 1);
+          const link = commitPR.html_url;
+          changesByGroup[category].push(`- [${text}](${link})\r\n`);
         }
       }
     }
