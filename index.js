@@ -48,10 +48,10 @@ const run = async () => {
         );
         let category = "Other";
         if (categoryReg && categoryReg[2]) {
+          // The contents of the second capture group `(.*$)`
           category = categoryReg[2];
         }
-        // The contents of the second capture group `(.*$)`
-        const category = categoryReg[2];
+
         if (!changesByGroup[category]) {
           changesByGroup[category] = [];
         }
