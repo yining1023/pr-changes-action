@@ -46,16 +46,18 @@ const run = async () => {
         const categoryReg = new RegExp("(- \\[ *[xX] *\\] )(.*$)", "m").exec(
           bodyAfterHeading
         );
-        if (categoryReg) {
-          // The contents of the second capture group `(.*$)`
-          const category = categoryReg[2];
-          if (!changesByGroup[category]) {
-            changesByGroup[category] = [];
-          }
-          const text = message.substring(0, commitPrNumberReg.index - 1);
-          const link = commitPR.html_url;
-          changesByGroup[category].push(`- [${text}](${link})\r\n`);
+        let category = "Other";
+        if (categoryReg && categoryReg[2]) {
+          category = categoryReg[2];
         }
+        // The contents of the second capture group `(.*$)`
+        const category = categoryReg[2];
+        if (!changesByGroup[category]) {
+          changesByGroup[category] = [];
+        }
+        const text = message.substring(0, commitPrNumberReg.index - 1);
+        const link = commitPR.html_url;
+        changesByGroup[category].push(`- [${text}](${link})\r\n`);
       }
     }
 
