@@ -46,16 +46,18 @@ const run = async () => {
         const categoryReg = new RegExp("(- \\[ *[xX] *\\] )(.*$)", "m").exec(
           bodyAfterHeading
         );
-        if (categoryReg) {
+        let category = "Other";
+        if (categoryReg && categoryReg[2]) {
           // The contents of the second capture group `(.*$)`
-          const category = categoryReg[2];
-          if (!changesByGroup[category]) {
-            changesByGroup[category] = [];
-          }
-          const text = message.substring(0, commitPrNumberReg.index - 1);
-          const link = commitPR.html_url;
-          changesByGroup[category].push(`- [${text}](${link})\r\n`);
+          category = categoryReg[2];
         }
+
+        if (!changesByGroup[category]) {
+          changesByGroup[category] = [];
+        }
+        const text = message.substring(0, commitPrNumberReg.index - 1);
+        const link = commitPR.html_url;
+        changesByGroup[category].push(`- [${text}](${link})\r\n`);
       }
     }
 
@@ -71,8 +73,7 @@ const run = async () => {
       repo,
       pull_number: prNumber,
     });
-    const body = releasePr.body;
-    const newBody = `We are ready for QA. Shoutout to @design-team @engineering-team for all the updates!:tada:\r\n${changes}\r\n${body}\r\nPR: [#${prNumber}](https://github.com/runwayml/app/pull/${prNumber})\r\n`;
+    const newBody = `We are ready for QA. Shoutout to @design-team @engineering-team for all the updates!:tada:\r\n${changes}\r\nPR: [#${prNumber}](https://github.com/runwayml/app/pull/${prNumber})\r\n`;
 
     await octokit.rest.pulls.update({
       owner,
