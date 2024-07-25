@@ -73,7 +73,7 @@ const run = async () => {
       repo,
       pull_number: prNumber,
     });
-    const newBody = `Shoutout to @design-team @engineering-team for all the updates!:tada:\r\n${changes}\r\nPR: [#${prNumber}](https://github.com/runwayml/app/pull/${prNumber})\r\n`;
+    const newBody = `Shoutout to @design-team @frontend-team for all the updates!:tada:\r\n${changes}\r\nPR: [#${prNumber}](https://github.com/runwayml/app/pull/${prNumber})\r\n`;
 
     await octokit.rest.pulls.update({
       owner,
