@@ -10,6 +10,20 @@ const run = async () => {
     const owner = github.context.repo.owner;
     const repo = github.context.repo.repo;
 
+    const pullRequest = await octokit.rest.pulls.get({
+      owner,
+      repo,
+      pull_number: prNumber,
+    });
+
+    const branch = pullRequest.data.head.ref;
+
+    const demoSubdomain = branch.replace(/^demo-/, "");
+    const demoUrl = `https://${demoSubdomain}.app.demo.runwayml.com`;
+
+    const stageSubdomain = branch.replace(/^stage-/, "");
+    const stageUrl = `https://${stageSubdomain}.app.stage.runwayml.com`;
+
     const commits = await octokit.paginate(octokit.rest.pulls.listCommits, {
       owner,
       repo,
@@ -80,7 +94,12 @@ const run = async () => {
       });
     }
 
-    const newBody = `We are ready for QA. Shoutout to @design-team & @product-eng-team for all the updates!:tada:\r\n${changes}\r\nPR: [#${prNumber}](https://github.com/runwayml/app/pull/${prNumber})\r\n`;
+    const newBody = `We are ready for QA. Shoutout to @design-team & @product-eng-team for all the updates! :tada:
+${changes}
+
+Link: [${demoUrl}](${demoUrl})
+Stage Link (only use it to test billing changes): [${stageUrl}](${stageUrl})
+PR: [#${prNumber}](https://github.com/runwayml/app/pull/${prNumber})`;
 
     await octokit.rest.pulls.update({
       owner,
