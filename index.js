@@ -88,9 +88,13 @@ const run = async () => {
       changes += `\n`;
       changes += `**${category}:**\r\n`;
       
+      // Sort the items by author alphabetically
+      changesByGroup[category].sort((a, b) => a.author.localeCompare(b.author));
+
       // Format each entry with author name and files changed count
       changesByGroup[category].forEach(item => {
-        changes += `- @${item.author}: [${item.text}](${item.link}) (${item.filesChanged} files)\r\n`;
+        const slackTag = authorToSlackTag[item.author];
+        changes += `- @${slackTag ?? item.author}: [${item.text}](${item.link}) (${item.filesChanged} files)\r\n`;
       });
     }
 
@@ -112,5 +116,20 @@ PR: [#${prNumber}](https://github.com/runwayml/app/pull/${prNumber})`;
     core.setFailed(error.message);
   }
 };
+
+const authorToSlackTag = {
+  "robinandeer": "Robin",
+  "annekagoss": "Anneka",
+  "bryanlohjy": "Bryan Loh",
+  "yining1023": "Yining",
+  "EdwinToh": "Edwin Toh",
+  "jacobjonsson": "Jacob",
+  'lindsbot': "Lindsay",
+  "tlakomy": "Tomasz Łakomy",
+  "DexterShepherd": "Dexter",
+  "jeremybenaim": "Jeremy",
+  "krismuniz": "Kristian",
+  "matamalaortiz": "Alejandro"
+}
 
 run();
