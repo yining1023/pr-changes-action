@@ -48,7 +48,6 @@ const run = async () => {
         if (!commitPR || !commitPR.body) continue;
 
         const commitPRBody = commitPR.body;
-        const author = commitPR.user.login;
 
         // Remove text before this heading, because any checkbox can match the regex for [x]
         const typeOfChangeHeadingIndex = commitPRBody.indexOf("Type of change");
@@ -70,14 +69,9 @@ const run = async () => {
           const text = message.substring(0, commitPrNumberReg.index - 1);
           const link = commitPR.html_url;
           
-          // Extract the number of files changed
-          const filesChanged = commitPR.changed_files;
-          
           changesByGroup[category].push({
             text,
             link,
-            author,
-            filesChanged
           });
         }
       }
@@ -88,9 +82,8 @@ const run = async () => {
       changes += `\n`;
       changes += `**${category}:**\r\n`;
       
-      // Format each entry with author name and files changed count
       changesByGroup[category].forEach(item => {
-        changes += `- @${item.author}: [${item.text}](${item.link}) (${item.filesChanged} files)\r\n`;
+        changes += `- [${item.text}](${item.link})\r\n`;
       });
     }
 
